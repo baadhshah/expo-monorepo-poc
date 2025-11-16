@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "Sorella Online",
+    "slug": "sorella-online",
+    "android": {
+      "package": "so.movement.sorellaonline",
+      "versionCode": 1
+    },
+    "extra": {
+      "webViewUrl": "https://sorella-online.mvt.so/",
+      "eas": {
+        "projectId": "3d45efb7-3fa4-439e-a2b4-7cc26227ec9a"
+      }
+    }
+  }
+}

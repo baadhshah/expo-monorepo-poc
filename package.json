@@ -1,0 +1,11 @@
+{
+  "name": "expo-monorepo-poc",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run start",
+    "build": "turbo run build"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  }
+}
