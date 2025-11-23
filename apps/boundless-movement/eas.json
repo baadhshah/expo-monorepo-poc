@@ -4,14 +4,16 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
-    },
     "preview": {
-      "distribution": "internal"
+      "env": { "EXPO_USE_METRO_WORKSPACE_ROOT": "1" },
+      "distribution": "internal",
+      "credentialsSource": "remote",
+      "android": { "buildType": "apk" }
     },
     "production": {
+      "env": { "EXPO_USE_METRO_WORKSPACE_ROOT": "1" },
+      "credentialsSource": "remote",
+      "android": { "buildType": "app-bundle" },
       "autoIncrement": true
     }
   },
