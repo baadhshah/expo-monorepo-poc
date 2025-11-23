@@ -1,0 +1,502 @@
+Expo Multi-App Monorepo Architecture Proposal
+
+Overview
+
+This document proposes a production-ready architecture for managing 50+ Expo apps in a single monorepo. The goals are to:
+
+- Maintain individual app identity (bundle IDs, icons, configurations).
+- Centralize dependency management (single source of truth).
+- Eliminate code duplication (shared components and business logic).
+- Make updates scalable (SDK upgrades in hours instead of weeks).
+- Work seamlessly with EAS Build and EAS Submit, including Expo’s GitHub UI.
+- Reduce storage usage and CI build times via shared dependencies and build caching.
+
+1. Refactoring Approach & Repository Structure
+
+1.1 High-Level Architecture
+
+The recommended architecture is a monorepo structured as follows:
+
+- apps/* – one folder per app, responsible only for app identity and configuration.
+- packages/core – shared runtime logic, UI, and business rules.
+- packages/expo-preset – centralized Expo/React Native dependency versions.
+- pnpm workspaces and Turborepo drive dependency sharing and build orchestration.
+
+1.2 Proposed Repository Layout
+
+expo-multi-app-monorepo/
+  apps/                          # One directory per app
+    20lifestyle/
+      app.json                   # App-specific Expo config
+      eas.json                   # App-specific EAS config
+      App.tsx                    # Thin wrapper around shared core
+      assets/                    # Icons, splash, branded images
+      package.json               # Minimal, depends on shared packages
+    boundless-movement/
+    sorella-online/
+    ... (rest of apps)
+
+  packages/
+    core/                        # Shared app logic & components
+      src/
+        index.tsx
+        createApp.tsx
+        Loader.tsx
+        shared.ts
+        hooks/...
+        features/...(iap, audio, notifications, webview, etc.)
+      package.json
+    expo-preset/                 # Shared Expo/RN versions
+      package.json
+
+  package.json                   # Root scripts & toolchain
+  pnpm-workspace.yaml            # Workspace definition (apps/*, packages/*)
+  turbo.json                     # Turborepo pipeline (build, lint, test)
+  .github/workflows/             # CI + EAS automation (optional)
+
+1.3 Per-App Structure & Identity
+
+Each app under apps/* retains its own identity:
+
+- app.json – name, slug, bundle IDs, icons, splash, and expo.extra values.
+- eas.json – EAS build/submit configuration and project linkage.
+- assets/ – app-specific icons, splash screens, and branding assets.
+- App.tsx – a thin wrapper delegating to shared logic.
+
+Example App.tsx pattern:
+
+import Constants from 'expo-constants';
+import { createApp } from '@shared/core';
+
+const extra = (Constants.expoConfig?.extra ?? {}) as any;
+
+export default createApp({
+  webViewUrl: extra.webViewUrl ?? 'https://app-slug.mvt.so/',
+  appKey: extra.appKey ?? 'app-slug'
+  // Additional per-app settings and feature flags can be passed here
+});
+
+All substantial logic lives in packages/core, while each app controls only its identity and configuration.
+
+1.4 Handling the 5% App-Specific Logic
+
+Approximately 95% of logic is shared through packages/core. The remaining 5% of app-specific behavior is expressed via:
+
+- Configuration values:
+  - URLs, app keys, feature flags, colors, and similar values are stored in app.json → expo.extra.
+  - Values are read via expo-constants and passed into createApp.
+
+- Optional flags and callbacks:
+  - The AppConfig type in packages/core can define optional fields, for example:
+    - enableBonusScreen?: boolean
+    - themeVariant?: 'light' | 'dark' | 'brandX'
+    - onSpecialEvent?: () => void
+  - Selected apps pass these options from their App.tsx wrapper.
+
+- Rare, truly unique components:
+  - If an app needs a special component, it can reside in apps/{app}/src.
+  - The wrapper can pass it into createApp (for example, specialScreen, customHeader).
+
+This approach keeps shared code generic and extensible, while app-specific behavior is localized, explicit, and typed.
+
+2. Tooling & Infrastructure
+
+2.1 Monorepo Tools
+
+The monorepo is built on:
+
+- pnpm workspaces:
+  - Single lockfile and shared dependency store.
+  - Efficient installs and strict dependency resolution.
+- Turborepo:
+  - Task orchestration for build, lint, and test across apps and packages.
+  - Build caching and parallelization for faster CI and local workflows.
+- TypeScript / ESLint / Prettier:
+  - Configured at the root and shared across the monorepo for consistent quality and developer experience.
+
+2.2 Dependency Management Strategy
+
+Expo, React Native, and other shared dependencies are centralized in packages/expo-preset:
+
+{
+  "name": "@shared/expo-preset",
+  "version": "53.0.0",
+  "dependencies": {
+    "expo": "~53.0.0",
+    "react-native": "0.77.x",
+    "react": "18.3.1",
+    "expo-device": "~x.y.z",
+    "expo-linking": "~x.y.z",
+    "expo-notifications": "^...",
+    "expo-status-bar": "~3.0.8",
+    "react-native-webview": "...",
+    "expo-build-properties": "~..."
+  }
+}
+
+Per-app package.json files stay minimal and reference shared packages:
+
+{
+  "name": "app-slug",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@shared/core": "workspace:*",
+    "@shared/expo-preset": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "~19.1.0",
+    "typescript": "~5.9.2"
+  },
+  "private": true
+}
+
+This produces a single source of truth for Expo/RN versions, no per-app pinning of core dependencies, and a straightforward upgrade path for the entire fleet.
+
+2.3 pnpm Workspace Configuration
+
+pnpm-workspace.yaml:
+
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+The workspace configuration ensures that:
+
+- All apps and packages are part of the same dependency graph.
+- workspace:* references resolve correctly.
+- A single pnpm install prepares development across the entire monorepo.
+
+2.4 Turborepo Configuration
+
+turbo.json:
+
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".expo/**"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "test": {
+      "dependsOn": ["^test"]
+    }
+  }
+}
+
+Example commands:
+
+- Build a single app:
+
+  pnpm --filter apps/20lifestyle build
+
+- Build all apps:
+
+  turbo run build --filter='apps/*'
+
+Turborepo reuses cached results when code has not changed, reducing CI and local build times significantly.
+
+2.5 Rationale and Trade-offs
+
+Advantages:
+
+- Centralized dependencies and configuration.
+- Thin app shells with minimal duplication.
+- Efficient disk usage and install times via pnpm.
+- Faster and more predictable builds via Turborepo.
+- Clear separation between shared logic and per-app identity.
+
+Trade-offs:
+
+- Requires adoption of monorepo practices by the team.
+- Demands careful initial extraction of shared logic into packages/core.
+- Relies on consistent patterns across apps for maximum benefit.
+
+Overall, this tooling stack balances simplicity, performance, and scalability for a large number of similar apps.
+
+3. EAS Integration
+
+3.1 EAS Build and Submit
+
+Each app retains its own eas.json, for example:
+
+{
+  "cli": {
+    "version": ">= 16.27.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "preview": {
+      "env": {
+        "EXPO_USE_METRO_WORKSPACE_ROOT": "1"
+      },
+      "distribution": "internal",
+      "credentialsSource": "remote",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "env": {
+        "EXPO_USE_METRO_WORKSPACE_ROOT": "1"
+      },
+      "credentialsSource": "remote",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
+
+Key aspects:
+
+- EXPO_USE_METRO_WORKSPACE_ROOT=1 allows the EAS build environment to resolve modules from the monorepo root (for example, @shared/core).
+- Each app is linked to its own EAS project, preserving independent build and submit histories, separate bundle identifiers and package names, and per-app versioning and release workflows.
+
+Example build and submit commands per app:
+
+cd apps/20lifestyle
+eas build --platform android --profile production
+eas submit --platform android --profile production
+
+3.2 Expo GitHub UI Integration
+
+In the Expo dashboard and GitHub integration:
+
+- The GitHub repository hosts all apps.
+- The Project root for each app is configured to its specific subdirectory, for example apps/20lifestyle.
+- Expo reads app.json and eas.json from that subdirectory and treats it as a standalone project.
+
+This preserves independent, UI-triggered builds per app, clear organization of projects and build logs in the Expo dashboard, and compatibility with both CLI and GitHub-based workflows.
+
+3.3 Optional CI Integration
+
+A GitHub Actions workflow can orchestrate EAS builds for multiple apps:
+
+name: EAS Build
+
+on:
+  push:
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [20lifestyle, boundless-movement, sorella-online]
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+
+      - name: EAS build
+        run: eas build --platform android --profile preview --non-interactive
+        working-directory: apps/${{ matrix.app }}
+
+Additional apps can be added to the matrix as the fleet grows.
+
+4. Practical Example: Expo SDK Upgrade (52 → 53)
+
+4.1 Scope of Changes
+
+In this architecture, upgrading all apps from Expo SDK 52 to 53 mainly involves:
+
+- Updating shared dependency versions in packages/expo-preset/package.json.
+- Adjusting shared code in packages/core to accommodate API or behavior changes.
+- Optionally updating shared configurations if required by the official migration guide.
+
+Per-app package.json files do not need manual version bumps, as they consume versions from @shared/expo-preset.
+
+4.2 Upgrade Procedure
+
+1. Update the central preset:
+
+   cd packages/expo-preset
+   pnpm add expo@~53.0.0 react-native@0.77.x react@18.3.1 --save
+   pnpm update
+
+2. Adjust shared core code:
+
+   cd packages/core
+   pnpm install
+   # Update code according to the Expo SDK 53 migration guide
+   pnpm test
+
+3. Verify with a small number of apps:
+
+   cd apps/20lifestyle
+   pnpm install
+   expo start --android
+   # Perform manual smoke testing of key flows
+
+   Additional representative apps (with slightly different configurations) can be tested similarly to validate coverage.
+
+4. Roll out to all apps:
+
+   cd <repo-root>
+   pnpm install
+   turbo run build --filter='apps/*'
+
+5. Run preview builds in EAS:
+
+   for app in 20lifestyle boundless-movement sorella-online
+   do
+     (cd apps/$app && eas build --platform android --profile preview --non-interactive)
+   done
+
+4.3 Time and Verification
+
+- Central dependency update and shared core adjustments: typically on the order of 1–2 hours.
+- Smoke testing on several apps: 30–60 minutes.
+- EAS preview builds: automated, can run in parallel.
+
+Verification combines:
+
+- Automated tests in packages/core (unit and integration tests).
+- Typechecking and linting across the monorepo.
+- Manual smoke tests for representative apps spanning different configuration patterns.
+
+5. Migration Plan
+
+5.1 Strategy
+
+The migration from separate apps to this monorepo structure can proceed in phases:
+
+1. Foundation:
+   - Implement the monorepo structure described above.
+   - Ensure packages/core, packages/expo-preset, pnpm-workspace.yaml, and turbo.json are in place.
+   - Validate the full workflow for a small number of apps (build, run, EAS build & submit).
+
+2. Batch Migration:
+   - Migrate apps in batches, for example 5–10 at a time.
+   - After each batch:
+     - Run local builds and tests for that batch.
+     - Run EAS preview builds.
+     - Improve shared logic in packages/core to handle edge cases encountered.
+
+3. Stabilization and Cleanup:
+   - Remove old duplicated code once apps are fully migrated.
+   - Normalize configuration patterns and align all apps to a shared template where possible.
+   - Update internal documentation to reflect the new layout and workflows.
+
+5.2 Per-App Migration Checklist
+
+For each existing app:
+
+- Create the directory apps/app-slug/.
+- Move or create:
+  - app.json with:
+    - expo.name, expo.slug.
+    - ios.bundleIdentifier, android.package.
+    - icon and splash paths under assets/.
+    - expo.extra fields such as webViewUrl, appKey, feature flags, etc.
+  - eas.json with standardized build profiles and EXPO_USE_METRO_WORKSPACE_ROOT.
+  - assets/ with icons and splash screens.
+  - App.tsx thin wrapper that imports createApp from @shared/core and passes in configuration.
+
+- Simplify package.json to depend on @shared/core and @shared/expo-preset via workspace:*.
+- Link or confirm EAS project configuration from inside apps/app-slug.
+- Validate the app by running expo start locally and an EAS preview build.
+
+5.3 Risks and Mitigation
+
+- Differences in configurations across existing apps:
+  - Some apps may use unique plugins or config shapes.
+  - Mitigation: migrate a variety of app types early, adapt packages/core and shared presets to cover those scenarios.
+
+- Differences in existing EAS project setups:
+  - Some projects may require careful mapping between old and new paths.
+  - Mitigation: maintain a mapping of app slugs to EAS project IDs and adjust using eas project:link or eas project:init.
+
+- Team learning curve:
+  - The monorepo introduces new patterns.
+  - Mitigation: concise internal documentation, code examples, and a migration checklist.
+
+6. Real-World Automation and App Creation
+
+6.1 Automated App Creation Script
+
+A script such as scripts/new-app.sh can automate new app creation:
+
+- Inputs:
+  - App slug, display name, iOS bundle ID, Android package, base URL, etc.
+- Actions:
+  - Create apps/{slug}.
+  - Generate:
+    - App.tsx using a template that calls createApp.
+    - app.json with the appropriate identity and expo.extra values.
+    - eas.json with consistent profiles and environment variables.
+    - assets/ with default or brand-specific icons and splash images.
+  - Optionally invoke EAS setup and additional scripts for assets or metadata.
+
+The script reduces human error and ensures that all new apps follow the same structure and patterns.
+
+6.2 Templates and Supporting Scripts
+
+- Hygen templates can be used to generate:
+  - Minimal App.tsx wrappers.
+  - app.json and eas.json populated from parameters passed to the script.
+
+- Ruby or other helper scripts can:
+  - Process icons and splash screens.
+  - Update configurations and metadata within app.json and eas.json.
+
+These tools operate within the apps/{slug} directories and do not need to duplicate shared application logic.
+
+6.3 New App Creation Flow
+
+Once the system is in place, creating a new app follows a simple process:
+
+1. Run:
+
+   ./scripts/new-app.sh app-slug "Display Name" com.example.appslug com.example.appslug
+
+2. The script creates the shell app in apps/app-slug including configuration and assets.
+
+3. The app can immediately be started and built:
+
+   cd apps/app-slug
+   pnpm install   # if needed, or rely on root install
+   expo start
+
+The new app shares all core logic, ensuring consistent behavior and rapid provisioning.
+
+7. Summary
+
+This monorepo architecture:
+
+- Preserves independent app identity (configs, bundle IDs, branding).
+- Centralizes dependencies and shared logic in packages/core and packages/expo-preset.
+- Eliminates nearly all code duplication, reducing maintenance overhead.
+- Makes Expo SDK upgrades and dependency updates controlled, predictable, and fast.
+- Integrates seamlessly with EAS Build, EAS Submit, and Expo’s GitHub UI.
+- Improves storage efficiency and CI performance via shared dependencies and build caching.
+
+By consolidating logic and dependencies while keeping app-specific identity at the edge, this structure enables scalable management of a large fleet of Expo apps with clear, maintainable patterns.
+
+
