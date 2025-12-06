@@ -1,15 +1,15 @@
 {
   "expo": {
     "name": "2.0FIT",
-    "slug": "20lifestyle",
+    "slug": "lifestyle",
     "android": {
-      "package": "so.movement.m20lifestyle",
+      "package": "so.movement.lifestyle",
       "versionCode": 1
     },
     "extra": {
-      "webViewUrl": "https://20lifestyle.mvt.so/",
+      "webViewUrl": "https://lifestyle.mvt.so/",
       "eas": {
-        "projectId": "c220f9fb-1126-420e-899d-59d55e74948e"
+        "projectId": ""
       }
     },
     "plugins": [

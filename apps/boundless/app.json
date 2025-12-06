@@ -1,15 +1,15 @@
 {
   "expo": {
     "name": "Boundless Movement",
-    "slug": "boundless-movement",
+    "slug": "boundless",
     "android": {
-      "package": "so.movement.boundlessmovement",
+      "package": "so.movement.boundless",
       "versionCode": 1
     },
     "extra": {
-      "webViewUrl": "https://boundless-movement.mvt.so/",
+      "webViewUrl": "https://boundless.mvt.so/",
       "eas": {
-        "projectId": "4a1b0d7c-d910-45df-80d0-932b7c5fed1b"
+        "projectId": ""
       }
     },
     "plugins": [
