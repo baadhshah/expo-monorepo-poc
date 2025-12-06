@@ -52,3 +52,4 @@ build/
 DB_store/
 **/DB_store/
 .DS_Store
+node_modules
