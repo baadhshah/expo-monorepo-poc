@@ -9,12 +9,13 @@
     "extra": {
       "webViewUrl": "https://lifestyle.mvt.so/",
       "eas": {
-        "projectId": ""
+        "projectId": "352778cd-bc0e-48ce-a690-bf68e411ed08"
       }
     },
     "plugins": [
       "expo-asset",
       "expo-font"
-    ]
+    ],
+    "owner": "daaspunkajj"
   }
 }

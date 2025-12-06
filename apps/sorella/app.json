@@ -9,12 +9,13 @@
     "extra": {
       "webViewUrl": "https://sorella.mvt.so/",
       "eas": {
-        "projectId": ""
+        "projectId": "648e8f64-4707-44fd-9f04-e405997378d8"
       }
     },
     "plugins": [
       "expo-asset",
       "expo-font"
-    ]
+    ],
+    "owner": "daaspunkajj"
   }
 }

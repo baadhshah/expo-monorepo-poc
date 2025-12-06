@@ -9,12 +9,13 @@
     "extra": {
       "webViewUrl": "https://boundless.mvt.so/",
       "eas": {
-        "projectId": ""
+        "projectId": "88829b67-1cdc-41a7-8061-f13dd6ce9286"
       }
     },
     "plugins": [
       "expo-asset",
       "expo-font"
-    ]
+    ],
+    "owner": "daaspunkajj"
   }
 }
