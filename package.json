@@ -4,7 +4,8 @@
   "packageManager": "pnpm@10.22.0",
   "scripts": {
     "dev": "turbo run start",
-    "build": "turbo run build"
+    "build": "turbo run build",
+    "eas": "eas"
   },
   "dependencies": {
     "expo": "~54.0.23",
@@ -51,6 +52,7 @@
     }
   },
   "devDependencies": {
+    "eas-cli": "latest",
     "turbo": "^2.0.0",
     "typescript": "^5.4.5"
   }
