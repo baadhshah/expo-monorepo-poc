@@ -4,8 +4,8 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "20lifestyle": {
-      "workingDirectory": "apps/20lifestyle",
+    "lifestyle": {
+      "workingDirectory": "apps/lifestyle",
       "node": { "version": "18.18.0" },
       "env": { "EXPO_USE_METRO_WORKSPACE_ROOT": "1" },
       "installCommand": "pnpm install",
@@ -13,8 +13,8 @@
       "credentialsSource": "remote",
       "android": { "buildType": "apk" }
     },
-    "boundless-movement": {
-      "workingDirectory": "apps/boundless-movement",
+    "boundless": {
+      "workingDirectory": "apps/boundless",
       "node": { "version": "18.18.0" },
       "env": { "EXPO_USE_METRO_WORKSPACE_ROOT": "1" },
       "installCommand": "pnpm install",
@@ -22,8 +22,8 @@
       "credentialsSource": "remote",
       "android": { "buildType": "apk" }
     },
-    "sorella-online": {
-      "workingDirectory": "apps/sorella-online",
+    "sorella": {
+      "workingDirectory": "apps/sorella",
       "node": { "version": "18.18.0" },
       "env": { "EXPO_USE_METRO_WORKSPACE_ROOT": "1" },
       "installCommand": "pnpm install",
@@ -36,5 +36,6 @@
     "production": {}
   }
 }
+
 
 
