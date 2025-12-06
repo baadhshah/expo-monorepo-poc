@@ -2,38 +2,6 @@
   "cli": {
     "version": ">= 16.27.0",
     "appVersionSource": "remote"
-  },
-  "build": {
-    "lifestyle": {
-      "workingDirectory": "apps/lifestyle",
-      "node": { "version": "18.18.0" },
-      "env": { "EXPO_USE_METRO_WORKSPACE_ROOT": "1" },
-      "installCommand": "pnpm install",
-      "distribution": "internal",
-      "credentialsSource": "remote",
-      "android": { "buildType": "apk" }
-    },
-    "boundless": {
-      "workingDirectory": "apps/boundless",
-      "node": { "version": "18.18.0" },
-      "env": { "EXPO_USE_METRO_WORKSPACE_ROOT": "1" },
-      "installCommand": "pnpm install",
-      "distribution": "internal",
-      "credentialsSource": "remote",
-      "android": { "buildType": "apk" }
-    },
-    "sorella": {
-      "workingDirectory": "apps/sorella",
-      "node": { "version": "18.18.0" },
-      "env": { "EXPO_USE_METRO_WORKSPACE_ROOT": "1" },
-      "installCommand": "pnpm install",
-      "distribution": "internal",
-      "credentialsSource": "remote",
-      "android": { "buildType": "apk" }
-    }
-  },
-  "submit": {
-    "production": {}
   }
 }
 
