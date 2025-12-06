@@ -24,7 +24,7 @@ This tells pnpm: *"Treat every folder under `apps/` and `packages/` as a separat
 
 ### Real Example from Your Code
 
-**Your app's package.json** (`apps/20lifestyle/package.json`):
+**Your app's package.json** (`apps/lifestyle/package.json`):
 ```json
 {
   "dependencies": {
@@ -48,7 +48,7 @@ This tells pnpm: *"Treat every folder under `apps/` and `packages/` as a separat
 
 1. **Single dependency store**: pnpm installs all dependencies once in a central location (saves ~10-15 GB of disk space for 50 apps)
 2. **Hard links**: Each app's `node_modules` contains **hard links** to the central store (not copies)
-3. **Workspace linking**: `@shared/core` is automatically linked from `packages/core` to `apps/20lifestyle`
+3. **Workspace linking**: `@shared/core` is automatically linked from `packages/core` to `apps/lifestyle`
 
 ### Benefits
 
@@ -64,13 +64,13 @@ This tells pnpm: *"Treat every folder under `apps/` and `packages/` as a separat
 pnpm install
 
 # Install a new dependency for a specific app
-pnpm --filter 20lifestyle add some-package
+pnpm --filter lifestyle add some-package
 
 # Install a dependency for the shared core package
 pnpm --filter @shared/core add some-library
 
 # Run a script in a specific app
-pnpm --filter 20lifestyle start
+pnpm --filter lifestyle start
 ```
 
 ---
@@ -107,7 +107,7 @@ Look at your `turbo.json`:
 #### `"build": { "dependsOn": ["^build"], "outputs": [".expo/**"] }`
 - **Task name**: `build`
 - **`dependsOn: ["^build"]`**: The `^` means "dependencies" - build shared packages first, then apps
-  - Example: Build `packages/core` before building `apps/20lifestyle`
+  - Example: Build `packages/core` before building `apps/lifestyle`
 - **`outputs: [".expo/**"]`**: Cache the `.expo` folder (Turborepo knows what changed)
 
 ### How Turborepo Works
@@ -116,7 +116,7 @@ Look at your `turbo.json`:
 
 1. **Turborepo detects**: "Something in `packages/core` changed"
 2. **Rebuilds**: `packages/core` first (because it's a dependency)
-3. **Then rebuilds**: All apps that depend on `packages/core` (20lifestyle, boundless-movement, etc.)
+3. **Then rebuilds**: All apps that depend on `packages/core` (lifestyle, boundless, sorella, etc.)
 4. **Skips**: Apps that didn't change and don't depend on changed packages
 
 ### Example Workflow
@@ -129,7 +129,7 @@ turbo run build
 turbo run build --filter='./apps/*'
 
 # Build a specific app
-turbo run build --filter=20lifestyle
+turbo run build --filter=lifestyle
 
 # Build apps that depend on a changed package
 turbo run build --filter='...@shared/core'

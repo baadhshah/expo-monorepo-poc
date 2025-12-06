@@ -500,3 +500,4 @@ This monorepo architecture:
 By consolidating logic and dependencies while keeping app-specific identity at the edge, this structure enables scalable management of a large fleet of Expo apps with clear, maintainable patterns.
 
 
+

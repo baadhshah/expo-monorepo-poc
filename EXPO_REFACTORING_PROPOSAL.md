@@ -13,14 +13,14 @@ This proposal outlines a comprehensive refactoring strategy to transform the cur
 ```
 expo-multi-app-monorepo/
 ├── apps/                          # Individual app configurations
-│   ├── 20lifestyle/
+│   ├── lifestyle/
 │   │   ├── app.json              # App-specific config only
 │   │   ├── eas.json              # App-specific EAS config
 │   │   ├── package.json          # Minimal, references shared packages
 │   │   ├── App.tsx               # Thin wrapper (5-10 lines)
 │   │   ├── assets/               # App-specific assets (icons, splash)
 │   │   └── google-services.json  # App-specific
-│   ├── boundless-movement/
+│   ├── boundless/
 │   └── [other apps...]
 │
 ├── packages/                      # Shared code packages
@@ -68,11 +68,11 @@ expo-multi-app-monorepo/
 Each app becomes a minimal configuration wrapper:
 
 ```typescript
-// apps/20lifestyle/App.tsx
+// apps/lifestyle/App.tsx
 import { createApp } from '@fitterapp/core';
 
 export default createApp({
-  webViewUrl: 'https://20lifestyle.mvt.so/',
+  webViewUrl: 'https://lifestyle.mvt.so/',
   // Any app-specific overrides can be passed here
 });
 ```
@@ -84,20 +84,20 @@ The `createApp` function from `@fitterapp/core` handles all the shared logic (IA
 App-specific configurations are isolated:
 
 ```json
-// apps/20lifestyle/app.json
+// apps/lifestyle/app.json
 {
   "expo": {
     "name": "2.0FIT",
-    "slug": "20lifestyle",
+    "slug": "lifestyle",
     "extra": {
-      "webViewUrl": "https://20lifestyle.mvt.so/",
-      "fitterApp": "20lifestyle"
+      "webViewUrl": "https://lifestyle.mvt.so/",
+      "fitterApp": "lifestyle"
     },
     "ios": {
-      "bundleIdentifier": "so.movement.20lifestyle"
+      "bundleIdentifier": "so.movement.lifestyle"
     },
     "android": {
-      "package": "so.movement.m20lifestyle"
+      "package": "so.movement.mlifestyle"
     }
   }
 }
@@ -154,9 +154,9 @@ All shared Expo config (plugins, asset patterns, etc.) is managed in the core pa
 Each app references this preset:
 
 ```json
-// apps/20lifestyle/package.json
+// apps/lifestyle/package.json
 {
-  "name": "20lifestyle",
+  "name": "lifestyle",
   "dependencies": {
     "@fitterapp/core": "workspace:*",
     "@fitterapp/expo-preset": "workspace:*"
@@ -199,7 +199,7 @@ Each app can be built independently:
 
 ```bash
 # Build single app
-cd apps/20lifestyle
+cd apps/lifestyle
 eas build --platform ios --profile production
 
 # Build all apps (via Turborepo)
@@ -226,7 +226,7 @@ turbo run eas:build --filter='./apps/*'
 EAS Build works perfectly with monorepos. Each app directory is treated as an independent Expo project:
 
 ```json
-// apps/20lifestyle/eas.json
+// apps/lifestyle/eas.json
 {
   "cli": {
     "version": ">= 7.2.0"
@@ -234,7 +234,7 @@ EAS Build works perfectly with monorepos. Each app directory is treated as an in
   "build": {
     "production": {
       "env": {
-        "APP_SLUG": "20lifestyle"
+        "APP_SLUG": "lifestyle"
       }
     }
   }
@@ -282,7 +282,7 @@ jobs:
         working-directory: apps/${{ matrix.app }}
     strategy:
       matrix:
-        app: [20lifestyle, boundless-movement, ...]
+        app: [lifestyle, boundless, ...]
 ```
 
 ### 3.3 Independent Deployment
@@ -302,7 +302,7 @@ EAS Submit works identically:
 
 ```bash
 # Submit single app
-cd apps/20lifestyle
+cd apps/lifestyle
 eas submit --platform ios --latest
 
 # Or via GitHub UI (unchanged)
@@ -336,7 +336,7 @@ pnpm install
 
 ```bash
 # Test with one app first
-cd apps/20lifestyle
+cd apps/lifestyle
 pnpm install
 expo start --ios
 # Manual testing of key features
@@ -547,12 +547,12 @@ export interface AppConfig {
 #### **App Wrapper**
 
 ```typescript
-// apps/20lifestyle/App.tsx
+// apps/lifestyle/App.tsx
 import { createApp } from '@fitterapp/core';
 import Constants from 'expo-constants';
 
 const webViewUrl = Constants.expoConfig?.extra?.webViewUrl || 
-                   'https://20lifestyle.mvt.so/';
+                   'https://lifestyle.mvt.so/';
 
 export default createApp({ webViewUrl });
 ```
@@ -580,25 +580,25 @@ export function getSharedExpoConfig(): Partial<ExpoConfig> {
 #### **App-Specific Config**
 
 ```json
-// apps/20lifestyle/app.json
+// apps/lifestyle/app.json
 {
   "expo": {
     "name": "2.0FIT",
-    "slug": "20lifestyle",
+    "slug": "lifestyle",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
       "backgroundColor": "#000"
     },
     "ios": {
-      "bundleIdentifier": "so.movement.20lifestyle"
+      "bundleIdentifier": "so.movement.lifestyle"
     },
     "android": {
-      "package": "so.movement.m20lifestyle"
+      "package": "so.movement.mlifestyle"
     },
     "extra": {
-      "webViewUrl": "https://20lifestyle.mvt.so/",
-      "fitterApp": "20lifestyle"
+      "webViewUrl": "https://lifestyle.mvt.so/",
+      "fitterApp": "lifestyle"
     }
   }
 }

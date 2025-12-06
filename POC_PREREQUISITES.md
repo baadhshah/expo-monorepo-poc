@@ -101,9 +101,9 @@ For each of the 3 POC apps, you'll need:
 **Option A: Use 3 Apps from Test Repository** (Recommended for POC)
 - Use apps from: `https://github.com/movementso/expo-expert-test`
 - Suggested apps:
-  1. `20lifestyle` (Expo 52.0.47, RN 0.76.9)
-  2. `boundless-movement` (Expo 52.0.15, RN 0.76.3)
-  3. `sorella-online` (Expo 52.0.47, RN 0.76.9)
+  1. `lifestyle` (Expo 52.0.47, RN 0.76.9)
+  2. `boundless` (Expo 52.0.15, RN 0.76.3)
+  3. `sorella` (Expo 52.0.47, RN 0.76.9)
 
 **Option B: Use 3 Apps from Production**
 - Select 3 representative apps from your 50+ production apps
@@ -390,5 +390,6 @@ pnpm install
 **Document Version**: 1.0  
 **Last Updated**: 2024  
 **Status**: Ready for Review
+
 
 

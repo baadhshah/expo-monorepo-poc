@@ -68,9 +68,9 @@ This document provides a high-level summary for planning the Proof of Concept (P
 
 From `https://github.com/movementso/expo-expert-test`:
 
-1. **20lifestyle** (Expo 52.0.47, RN 0.76.9)
-2. **boundless-movement** (Expo 52.0.15, RN 0.76.3) 
-3. **sorella-online** (Expo 52.0.47, RN 0.76.9)
+1. **lifestyle** (Expo 52.0.47, RN 0.76.9)
+2. **boundless** (Expo 52.0.15, RN 0.76.3) 
+3. **sorella** (Expo 52.0.47, RN 0.76.9)
 
 **Pros**: 
 - Already available
@@ -231,5 +231,6 @@ Before starting POC, confirm:
 
 **Status**: Ready for Planning  
 **Next Action**: Review prerequisites and select apps
+
 
 

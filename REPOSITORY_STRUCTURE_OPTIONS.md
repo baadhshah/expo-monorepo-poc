@@ -257,13 +257,13 @@ eas build --platform android
 expo-monorepo-poc/          # Single Git repository
 ├── .git/
 ├── apps/
-│   ├── 20lifestyle/        # App 1
+│   ├── lifestyle/        # App 1
 │   │   ├── app.json
 │   │   ├── eas.json
 │   │   ├── package.json
 │   │   └── App.tsx
-│   ├── boundless-movement/ # App 2
-│   └── sorella-online/     # App 3
+│   ├── boundless/ # App 2
+│   └── sorella/     # App 3
 ├── packages/
 │   ├── core/               # Shared code
 │   │   ├── src/
@@ -328,5 +328,6 @@ This is:
 **Document Version**: 1.0  
 **Last Updated**: 2024  
 **Status**: Repository Structure Decision
+
 
 
